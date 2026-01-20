@@ -13,8 +13,13 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('cni')->unique();
+            $table->string('nom');
+            $table->string('prenom');
+            $table->string('telephone');
             $table->string('email')->unique();
+            $table->string('role')->default('inspecteur');
+            $table->string('adresse')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
@@ -46,4 +51,5 @@ return new class extends Migration
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
     }
+
 };
