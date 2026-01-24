@@ -11,7 +11,6 @@ import api, { sanctumClient } from '@/services/api'
  * 👉 Compatible Laravel Sanctum (session)
  */
 export const useAuthStore = defineStore('auth', () => {
-
   /**
    * ================================
    * STATE
@@ -19,9 +18,7 @@ export const useAuthStore = defineStore('auth', () => {
    * 👉 Utilisateur connecté
    * 👉 Persisté dans localStorage
    */
-  const user = ref(
-    localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null
-  )
+  const user = ref(localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null)
 
   /**
    * ================================
@@ -55,7 +52,6 @@ export const useAuthStore = defineStore('auth', () => {
 
     // 3️⃣ Sauvegarde de l'utilisateur
     user.value = response.data.user
-    localStorage.setItem('user', JSON.stringify(user.value))
   }
 
   /**
@@ -101,9 +97,7 @@ export const useAuthStore = defineStore('auth', () => {
    * 👉 Vérifie l'état de la session serveur
    */
   const initialize = async () => {
-    if (user.value) {
-      await fetchUser()
-    }
+    await fetchUser()
   }
 
   /**
@@ -117,6 +111,6 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     logout,
     fetchUser,
-    initialize
+    initialize,
   }
 })
