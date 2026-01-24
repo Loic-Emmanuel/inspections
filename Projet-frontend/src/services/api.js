@@ -7,11 +7,6 @@ import axios from 'axios'
  * 👉 Utilisé pour TOUTES les routes Laravel API protégées par Sanctum
  * 👉 Exemple : /api/login, /api/user, /api/inspections
  */
-
-// CONFIG GLOBALE
-axios.defaults.withCredentials = true
-axios.defaults.withXSRFToken = true
-
 const apiClient = axios.create({
   // Backend API
   baseURL: import.meta.env.VITE_API_URL_DEV || 'http://localhost:8000/api',
@@ -19,12 +14,13 @@ const apiClient = axios.create({
   // Headers standards pour Laravel
   headers: {
     'Content-Type': 'application/json',
-    'Accept': 'application/json',
+    Accept: 'application/json',
     'X-Requested-With': 'XMLHttpRequest',
   },
 
   // OBLIGATOIRE pour Sanctum (cookies de session)
   withCredentials: true,
+  withXSRFToken: true,
 })
 
 /**
@@ -35,8 +31,8 @@ const apiClient = axios.create({
  * 👉 En cas de 401, redirection vers login
  */
 apiClient.interceptors.response.use(
-  response => response,
-  error => {
+  (response) => response,
+  (error) => {
     if (error.response?.status === 401) {
       // Évite une boucle infinie si déjà sur /login
       if (!window.location.pathname.includes('/login')) {
@@ -44,7 +40,7 @@ apiClient.interceptors.response.use(
       }
     }
     return Promise.reject(error)
-  }
+  },
 )
 
 /**
@@ -54,7 +50,6 @@ apiClient.interceptors.response.use(
  * 👉 Un seul point d’entrée pour les appels backend
  */
 const api = {
-
   // ================================
   // AUTHENTIFICATION
   // ================================
@@ -71,6 +66,13 @@ const api = {
   getUser() {
     // GET /api/user
     return apiClient.get('/user')
+  },
+
+  // ================================
+  // DASHBOARD
+  // ================================
+  getDashboard() {
+    return apiClient.get('/dashboard')
   },
 
   // ================================
@@ -108,15 +110,11 @@ const api = {
 
     formData.append('category', category)
 
-    return apiClient.post(
-      `/inspections/${inspectionId}/images`,
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }
-    )
+    return apiClient.post(`/inspections/${inspectionId}/images`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
   },
 
   getInspectionImages(inspectionId) {
@@ -131,17 +129,11 @@ const api = {
   // RAPPORTS
   // ================================
   generateReport(inspectionId) {
-    return apiClient.get(
-      `/inspections/${inspectionId}/report`,
-      { responseType: 'blob' }
-    )
+    return apiClient.get(`/inspections/${inspectionId}/report`, { responseType: 'blob' })
   },
 
   downloadReport(inspectionId) {
-    return apiClient.get(
-      `/inspections/${inspectionId}/report/download`,
-      { responseType: 'blob' }
-    )
+    return apiClient.get(`/inspections/${inspectionId}/report/download`, { responseType: 'blob' })
   },
 }
 
@@ -156,6 +148,7 @@ const api = {
 export const sanctumClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL_BASE || 'http://localhost:8000',
   withCredentials: true,
+  withXSRFToken: true,
 })
 
 /**

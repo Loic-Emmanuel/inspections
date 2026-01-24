@@ -113,10 +113,11 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()
+const router = useRouter()  // Ajout de useRouter pour la navigation
 const authStore = useAuthStore()
 
 // Dropdown utilisateur
@@ -126,7 +127,7 @@ const dropdownRef = ref(null)
 /**
  * Données utilisateur depuis Pinia
  */
-const userName = computed(() => authStore.user?.name || 'Utilisateur')
+const userName = computed(() => authStore.user?.nom + ' ' + authStore.user?.prenom || 'Utilisateur')
 
 const userInitials = computed(() => {
   return userName.value
@@ -134,7 +135,7 @@ const userInitials = computed(() => {
     .map(n => n[0])
     .join('')
     .toUpperCase()
-    .slice(0, 2)
+    .slice(0, 1)
 })
 
 /**
@@ -159,7 +160,13 @@ const handleClickOutside = (event) => {
  * Déconnexion via Pinia (sécurisé)
  */
 const handleLogout = async () => {
-  await authStore.logout()
+  try {
+    await authStore.logout()
+    // Utilisation correcte de router.push() au lieu de route.push()
+    router.push({ name: 'Login' })
+  } catch (error) {
+    console.error('Erreur lors de la déconnexion:', error)
+  }
 }
 
 onMounted(() => {

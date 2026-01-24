@@ -1,243 +1,254 @@
 <template>
-  <MainLayout>
-    <!-- Header -->
-    <div class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-900">Tableau de bord</h1>
-      <p class="text-gray-600 mt-2">Vue d'ensemble de vos inspections</p>
-    </div>
-
-    <!-- Statistiques -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <!-- Total Inspections -->
-      <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm text-gray-600 font-medium">Total inspections</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">{{ stats.total }}</p>
-          </div>
-          <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
-            <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-          </div>
-        </div>
-        <div class="mt-4 flex items-center text-sm">
-          <span class="text-green-600 font-medium">+12%</span>
-          <span class="text-gray-600 ml-2">ce mois-ci</span>
-        </div>
+  <div class="min-h-screen bg-gray-50">
+    
+    <!-- Contenu principal -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <!-- Header -->
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Tableau de bord</h1>
+        <p class="text-gray-600 mt-2">Vue d'ensemble de vos inspections</p>
       </div>
 
-      <!-- Inspections ce mois -->
-      <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm text-gray-600 font-medium">Ce mois</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">{{ stats.thisMonth }}</p>
-          </div>
-          <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-            </svg>
-          </div>
-        </div>
-        <div class="mt-4 flex items-center text-sm">
-          <span class="text-green-600 font-medium">+8%</span>
-          <span class="text-gray-600 ml-2">vs mois dernier</span>
-        </div>
-      </div>
-
-      <!-- Images ajoutées -->
-      <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm text-gray-600 font-medium">Images</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">{{ stats.images }}</p>
-          </div>
-          <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-            </svg>
-          </div>
-        </div>
-        <div class="mt-4 flex items-center text-sm">
-          <span class="text-gray-600">Total uploadées</span>
-        </div>
-      </div>
-
-      <!-- Rapports générés -->
-      <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm text-gray-600 font-medium">Rapports</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">{{ stats.reports }}</p>
-          </div>
-          <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-            </svg>
-          </div>
-        </div>
-        <div class="mt-4 flex items-center text-sm">
-          <span class="text-gray-600">PDFs générés</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Actions rapides -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-      <!-- Nouvelle inspection -->
-      <router-link
-        to="/inspection/new"
-        class="bg-gradient-to-r from-indigo-600 to-indigo-700 rounded-xl shadow-lg p-8 text-white hover:from-indigo-700 hover:to-indigo-800 transition group"
-      >
-        <div class="flex items-center justify-between">
-          <div>
-            <h3 class="text-xl font-bold mb-2">Créer une inspection</h3>
-            <p class="text-indigo-100">Démarrer une nouvelle inspection avec ajout d'images</p>
-          </div>
-          <div class="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center group-hover:bg-white/30 transition">
-            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-            </svg>
-          </div>
-        </div>
-      </router-link>
-
-      <!-- Voir l'historique -->
-      <router-link
-        to="/inspections"
-        class="bg-white rounded-xl shadow-sm p-8 border-2 border-gray-200 hover:border-indigo-300 hover:shadow-md transition group"
-      >
-        <div class="flex items-center justify-between">
-          <div>
-            <h3 class="text-xl font-bold text-gray-900 mb-2">Consulter l'historique</h3>
-            <p class="text-gray-600">Accéder aux inspections passées et leurs rapports</p>
-          </div>
-          <div class="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center group-hover:bg-indigo-100 transition">
-            <svg class="w-7 h-7 text-gray-600 group-hover:text-indigo-600 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-          </div>
-        </div>
-      </router-link>
-    </div>
-
-    <!-- Inspections récentes -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200">
-      <div class="px-6 py-5 border-b border-gray-200">
-        <div class="flex items-center justify-between">
-          <h2 class="text-lg font-bold text-gray-900">Inspections récentes</h2>
-          <router-link to="/inspections" class="text-sm text-indigo-600 hover:text-indigo-700 font-medium">
-            Voir tout →
-          </router-link>
-        </div>
-      </div>
-
-      <div v-if="loading" class="p-8 text-center">
-        <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-gray-300 border-t-indigo-600"></div>
-        <p class="text-gray-600 mt-4">Chargement...</p>
-      </div>
-
-      <div v-else-if="recentInspections.length === 0" class="p-8 text-center">
-        <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-        </svg>
-        <p class="text-gray-600">Aucune inspection récente</p>
-      </div>
-
-      <div v-else class="divide-y divide-gray-200">
-        <div
-          v-for="inspection in recentInspections"
-          :key="inspection.id"
-          class="px-6 py-4 hover:bg-gray-50 transition cursor-pointer"
-          @click="goToInspection(inspection.id)"
-        >
+      <!-- Statistiques -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Total Inspections -->
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
           <div class="flex items-center justify-between">
-            <div class="flex-1">
-              <div class="flex items-center space-x-3">
-                <h3 class="text-base font-semibold text-gray-900">{{ inspection.location }}</h3>
-                <span class="px-2 py-1 text-xs font-medium rounded-full"
-                      :class="getStatusClass(inspection.status)">
-                  {{ inspection.status }}
-                </span>
-              </div>
-              <div class="mt-1 flex items-center space-x-4 text-sm text-gray-600">
-                <span class="flex items-center">
-                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                  </svg>
-                  {{ formatDate(inspection.date) }}
-                </span>
-                <span class="flex items-center">
-                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                  </svg>
-                  {{ inspection.images_count }} images
-                </span>
-              </div>
+            <div>
+              <p class="text-sm text-gray-600 font-medium">Total inspections</p>
+              <p class="text-3xl font-bold text-gray-900 mt-2">{{ stats.total }}</p>
             </div>
-            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-            </svg>
+            <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+          </div>
+          <div class="mt-4 flex items-center text-sm">
+            <span class="text-green-600 font-medium">+12%</span>
+            <span class="text-gray-600 ml-2">ce mois-ci</span>
+          </div>
+        </div>
+
+        <!-- Inspections ce mois -->
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600 font-medium">Ce mois</p>
+              <p class="text-3xl font-bold text-gray-900 mt-2">{{ stats.thisMonth }}</p>
+            </div>
+            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>
+            </div>
+          </div>
+          <div class="mt-4 flex items-center text-sm">
+            <span class="text-green-600 font-medium">+8%</span>
+            <span class="text-gray-600 ml-2">vs mois dernier</span>
+          </div>
+        </div>
+
+        <!-- Images ajoutées -->
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600 font-medium">Images</p>
+              <p class="text-3xl font-bold text-gray-900 mt-2">{{ stats.images }}</p>
+            </div>
+            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                </path>
+              </svg>
+            </div>
+          </div>
+          <div class="mt-4 flex items-center text-sm">
+            <span class="text-gray-600">Total uploadées</span>
+          </div>
+        </div>
+
+        <!-- Rapports générés -->
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600 font-medium">Rapports</p>
+              <p class="text-3xl font-bold text-gray-900 mt-2">{{ stats.reports }}</p>
+            </div>
+            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                </path>
+              </svg>
+            </div>
+          </div>
+          <div class="mt-4 flex items-center text-sm">
+            <span class="text-gray-600">PDFs générés</span>
           </div>
         </div>
       </div>
-    </div>
-  </MainLayout>
+
+      <!-- Actions rapides -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <!-- Nouvelle inspection -->
+        <router-link to="/inspection/new"
+          class="bg-gradient-to-r from-indigo-600 to-indigo-700 rounded-xl shadow-lg p-8 text-white hover:from-indigo-700 hover:to-indigo-800 transition group">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-xl font-bold mb-2">Créer une inspection</h3>
+              <p class="text-indigo-100">Démarrer une nouvelle inspection avec ajout d'images</p>
+            </div>
+            <div
+              class="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center group-hover:bg-white/30 transition">
+              <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+            </div>
+          </div>
+        </router-link>
+
+        <!-- Voir l'historique -->
+        <router-link to="/inspections"
+          class="bg-white rounded-xl shadow-sm p-8 border-2 border-gray-200 hover:border-indigo-300 hover:shadow-md transition group">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-xl font-bold text-gray-900 mb-2">Consulter l'historique</h3>
+              <p class="text-gray-600">Accéder aux inspections passées et leurs rapports</p>
+            </div>
+            <div
+              class="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center group-hover:bg-indigo-100 transition">
+              <svg class="w-7 h-7 text-gray-600 group-hover:text-indigo-600 transition" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+          </div>
+        </router-link>
+      </div>
+
+      <!-- Inspections récentes -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+        <div class="px-6 py-5 border-b border-gray-200">
+          <div class="flex items-center justify-between">
+            <h2 class="text-lg font-bold text-gray-900">Inspections récentes</h2>
+            <router-link to="/inspections" class="text-sm text-indigo-600 hover:text-indigo-700 font-medium">
+              Voir tout →
+            </router-link>
+          </div>
+        </div>
+
+        <div v-if="loading" class="p-8 text-center">
+          <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-gray-300 border-t-indigo-600"></div>
+          <p class="text-gray-600 mt-4">Chargement...</p>
+        </div>
+
+        <div v-else-if="recentInspections.length === 0" class="p-8 text-center">
+          <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+            </path>
+          </svg>
+          <p class="text-gray-600">Aucune inspection récente</p>
+        </div>
+
+        <div v-else class="divide-y divide-gray-200">
+          <div v-for="inspection in recentInspections" :key="inspection.id"
+            class="px-6 py-4 hover:bg-gray-50 transition cursor-pointer" @click="goToInspection(inspection.id)">
+            <div class="flex items-center justify-between">
+              <div class="flex-1">
+                <div class="flex items-center space-x-3">
+                  <h3 class="text-base font-semibold text-gray-900">{{ inspection.location }}</h3>
+                  <span class="px-2 py-1 text-xs font-medium rounded-full" :class="getStatusClass(inspection.status)">
+                    {{ inspection.status }}
+                  </span>
+                </div>
+                <div class="mt-1 flex items-center space-x-4 text-sm text-gray-600">
+                  <span class="flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    {{ formatDate(inspection.date) }}
+                  </span>
+                  <span class="flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                      </path>
+                    </svg>
+                    {{ inspection.images_count }} images
+                  </span>
+                </div>
+              </div>
+              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from 'axios'
-import MainLayout from '../components/MainLayout.vue'
+import api from '@/services/api'
 
 const router = useRouter()
+
+const loading = ref(true)
 
 const stats = ref({
   total: 0,
   thisMonth: 0,
   images: 0,
-  reports: 0
+  reports: 0,
 })
 
 const recentInspections = ref([])
-const loading = ref(true)
 
 const fetchDashboardData = async () => {
+  loading.value = true
+
   try {
-    const response = await axios.get('/api/dashboard')
-    stats.value = response.data.stats
-    recentInspections.value = response.data.recent_inspections
+    const { data } = await api.getDashboard()
+    console.log(data)
+
+    stats.value = data.stats ?? stats.value
+    recentInspections.value = data.recent_inspections ?? []
   } catch (error) {
-    console.error('Erreur lors du chargement du dashboard:', error)
+    console.error('Erreur chargement dashboard:', error)
   } finally {
     loading.value = false
   }
 }
 
-const formatDate = (date) => {
-  return new Date(date).toLocaleDateString('fr-FR', {
+const formatDate = (date) =>
+  new Date(date).toLocaleDateString('fr-FR', {
     day: '2-digit',
     month: 'long',
-    year: 'numeric'
+    year: 'numeric',
   })
-}
 
 const getStatusClass = (status) => {
-  const classes = {
+  const map = {
     'Complétée': 'bg-green-100 text-green-800',
     'En cours': 'bg-yellow-100 text-yellow-800',
-    'Brouillon': 'bg-gray-100 text-gray-800'
+    'Brouillon': 'bg-gray-100 text-gray-800',
   }
-  return classes[status] || 'bg-gray-100 text-gray-800'
+  return map[status] || 'bg-gray-100 text-gray-800'
 }
 
 const goToInspection = (id) => {
   router.push({ name: 'InspectionDetail', params: { id } })
 }
 
-onMounted(() => {
-  fetchDashboardData()
-})
+onMounted(fetchDashboardData)
 </script>
