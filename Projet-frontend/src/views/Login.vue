@@ -31,7 +31,8 @@
             <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
               Mot de passe
             </label>
-            <input id="password" v-model="form.password" name="password" type="password" required autocomplete="current-password"
+            <input id="password" v-model="form.password" name="password" type="password" required
+              autocomplete="current-password"
               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
               placeholder="••••••••" />
           </div>
@@ -43,9 +44,9 @@
                 class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" />
               <span class="ml-2 text-sm text-gray-600">Se souvenir de moi</span>
             </label>
-            <a href="#" class="text-sm text-indigo-600 hover:text-indigo-700">
+            <!-- <a href="#" class="text-sm text-indigo-600 hover:text-indigo-700">
               Mot de passe oublié ?
-            </a>
+            </a> -->
           </div>
 
           <!-- Message d'erreur -->
@@ -89,9 +90,8 @@ const authStore = useAuthStore()
 const form = ref({
   email: '',
   password: '',
-  remember: false
+  remember: false,
 })
-
 
 const loading = ref(false)
 const error = ref('')
@@ -105,16 +105,13 @@ const handleLogin = async () => {
     await authStore.login({
       email: form.value.email,
       password: form.value.password,
-      remember: form.value.remember
+      remember: form.value.remember,
     })
 
     // Redirection après succès
     router.push({ name: 'Dashboard' })
-
   } catch (err) {
-    error.value =
-      err.response?.data?.message ||
-      'Identifiants incorrects. Veuillez réessayer.'
+    error.value = err.response?.data?.message || 'Identifiants incorrects. Veuillez réessayer.'
   } finally {
     loading.value = false
   }

@@ -1,4 +1,4 @@
-import '@/assets/main.css';
+import '@/assets/main.css'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
@@ -16,4 +16,3 @@ const authStore = useAuthStore()
 authStore.initialize()
 
 app.mount('#app')
-
