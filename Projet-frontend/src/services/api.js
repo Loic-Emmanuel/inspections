@@ -9,7 +9,7 @@ import axios from 'axios'
  */
 const apiClient = axios.create({
   // Backend API
-  baseURL: import.meta.env.VITE_API_URL_DEV || 'http://localhost:8000/api',
+  // baseURL: import.meta.env.VITE_API_URL_DEV || 'http://localhost:8000/api/v1',
 
   // Headers standards pour Laravel
   headers: {
@@ -146,7 +146,7 @@ const api = {
  * 👉 IMPORTANT : pas de /api ici
  */
 export const sanctumClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL_BASE || 'http://localhost:8000',
+  baseURL: 'http://192.168.1.101:8092',
   withCredentials: true,
   withXSRFToken: true,
 })

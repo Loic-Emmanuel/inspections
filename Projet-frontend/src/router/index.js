@@ -1,66 +1,76 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
-// Layout
-import MainLayout from '@/components/MainLayout.vue'
-
 // Vues
 import Login from '@/views/Login.vue'
 import Dashboard from '@/views/Dashboard.vue'
 import NewInspection from '@/views/NewInspection.vue'
 import InspectionHistory from '@/views/InspectionHistory.vue'
 import InspectionDetail from '@/views/InspectionDetail.vue'
+import NotFound from '@/views/NotFound.vue'
+import UserList from '@/views/UserList.vue'
+
 
 const routes = [
   /**
-   * Route publique (sans layout)
+   * Route publique
    */
   {
     path: '/login',
     name: 'Login',
     component: Login,
-    meta: { requiresAuth: false }
+    meta: { requiresAuth: false },
   },
 
   /**
-   * Routes protégées (avec MainLayout)
+   * Routes protégées (indépendantes)
    */
   {
     path: '/',
-    component: MainLayout,
+    redirect: '/dashboard',
     meta: { requiresAuth: false },
-    children: [
-      {
-        path: '',
-        redirect: '/dashboard'
-      },
-      {
-        path: 'dashboard',
-        name: 'Dashboard',
-        component: Dashboard
-      },
-      {
-        path: 'inspection/new',
-        name: 'NewInspection',
-        component: NewInspection
-      },
-      {
-        path: 'inspections',
-        name: 'InspectionHistory',
-        component: InspectionHistory
-      },
-      {
-        path: 'inspection/:id',
-        name: 'InspectionDetail',
-        component: InspectionDetail
-      }
-    ]
+  },
+  {
+    path: '/dashboard',
+    name: 'Dashboard',
+    component: Dashboard,
+    meta: { requiresAuth: false },
+  },
+  {
+    path: '/inspection/new',
+    name: 'NewInspection',
+    component: NewInspection,
+    meta: { requiresAuth: false },
+  },
+  {
+    path: '/inspections',
+    name: 'InspectionHistory',
+    component: InspectionHistory,
+    meta: { requiresAuth: false },
+  },
+  {
+    path: '/inspection/:id',
+    name: 'InspectionDetail',
+    component: InspectionDetail,
+    props: true,
+    meta: { requiresAuth: false },
+  },
+  {
+    path: '/users',
+    name: 'UserList',
+    component: UserList,
+    meta: { requiresAuth: false },
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    component: NotFound
   }
 ]
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes
+  routes,
 })
 
 /**
@@ -69,16 +79,14 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
 
-  // Page protégée sans connexion
+  // Accès à une route protégée sans être connecté
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    next({ name: 'Login' })
-    return
+    return next({ name: 'Login' })
   }
 
-  // Utilisateur connecté qui tente d'aller sur /login
+  // Utilisateur connecté qui tente d'accéder à /login
   if (to.name === 'Login' && authStore.isAuthenticated) {
-    next({ name: 'Dashboard' })
-    return
+    return next({ name: 'Dashboard' })
   }
 
   next()
