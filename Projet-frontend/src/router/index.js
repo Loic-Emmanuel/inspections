@@ -1,16 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
-// Vues
-import Login from '@/views/Login.vue'
-import Dashboard from '@/views/Dashboard.vue'
-import NewInspection from '@/views/NewInspection.vue'
-import InspectionHistory from '@/views/InspectionHistory.vue'
-import InspectionDetail from '@/views/InspectionDetail.vue'
-import NotFound from '@/views/NotFound.vue'
-import UserList from '@/views/UserList.vue'
-
-
 const routes = [
   /**
    * Route publique
@@ -18,54 +8,82 @@ const routes = [
   {
     path: '/login',
     name: 'Login',
-    component: Login,
-    meta: { requiresAuth: false },
+    component: () => import('@/views/Login.vue'),
+    meta: { 
+      requiresAuth: false,
+      title: 'Connexion - Inspections'
+    },
   },
 
   /**
-   * Routes protégées (indépendantes)
+   * Routes protégées
    */
   {
     path: '/',
     redirect: '/dashboard',
-    meta: { requiresAuth: false },
+    meta: { 
+      requiresAuth: true,
+      title: 'Tableau de Bord - Inspections'
+    },
   },
   {
     path: '/dashboard',
     name: 'Dashboard',
-    component: Dashboard,
-    meta: { requiresAuth: false },
+    component: () => import('@/views/Dashboard.vue'),
+    meta: { 
+      requiresAuth: true,
+      title: 'Tableau de Bord - Inspections'
+    },
   },
   {
     path: '/inspection/new',
     name: 'NewInspection',
-    component: NewInspection,
-    meta: { requiresAuth: false },
+    component: () => import('@/views/NewInspection.vue'),
+    meta: { 
+      requiresAuth: true,
+      title: 'Nouvelle Inspection - Inspections'
+    },
   },
   {
     path: '/inspections',
     name: 'InspectionHistory',
-    component: InspectionHistory,
-    meta: { requiresAuth: false },
+    component: () => import('@/views/InspectionHistory.vue'),
+    meta: { 
+      requiresAuth: true,
+      title: 'Historique des Inspections - Inspections'
+    },
   },
   {
     path: '/inspection/:id',
     name: 'InspectionDetail',
-    component: InspectionDetail,
+    component: () => import('@/views/InspectionDetail.vue'),
     props: true,
-    meta: { requiresAuth: false },
+    meta: { 
+      requiresAuth: true,
+      title: 'Détail de l\'Inspection - Inspections'
+    },
   },
   {
     path: '/users',
     name: 'UserList',
-    component: UserList,
-    meta: { requiresAuth: false },
+    component: () => import('@/views/UserList.vue'),
+    meta: { 
+      requiresAuth: true,
+      title: 'Liste des Utilisateurs - Inspections'
+    },
   },
+
+  /**
+   * 404
+   */
   {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
-    component: NotFound
-  }
+    component: () => import('@/views/NotFound.vue'),
+    meta: { 
+      title: 'Page Non Trouvée - Inspections'
+    },
+  },
 ]
 
 const router = createRouter({
@@ -74,22 +92,30 @@ const router = createRouter({
 })
 
 /**
- * Guard global d’authentification
+ * ================================
+ * GUARD GLOBAL (TOKEN)
+ * ================================
  */
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to) => {
   const authStore = useAuthStore()
+
+  // Si l'utilisateur n'est pas encore initialisé
+  if (!authStore.user && localStorage.getItem('auth_token')) {
+    await authStore.fetchUser()
+  }
 
   // Accès à une route protégée sans être connecté
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    return next({ name: 'Login' })
+    return { name: 'Login' }
   }
 
   // Utilisateur connecté qui tente d'accéder à /login
   if (to.name === 'Login' && authStore.isAuthenticated) {
-    return next({ name: 'Dashboard' })
+    return { name: 'Dashboard' }
   }
 
-  next()
+  // Mettre à jour le titre de la page
+  document.title = to.meta.title || 'Inspections'
 })
 
 export default router

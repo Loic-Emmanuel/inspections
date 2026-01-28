@@ -1,30 +1,27 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import api, { sanctumClient } from '@/services/api'
+import api from '@/services/api'
 
 /**
  * =====================================
  * STORE AUTHENTIFICATION (Pinia)
  * =====================================
- * 👉 Gère l'état utilisateur
- * 👉 Gère la connexion / déconnexion
- * 👉 Compatible Laravel Sanctum (session)
+ * Authentification via Laravel Sanctum TOKEN
+ * Auth par Bearer Token (localStorage)
  */
 export const useAuthStore = defineStore('auth', () => {
+
   /**
    * ================================
    * STATE
    * ================================
-   * 👉 Utilisateur connecté
-   * 👉 Persisté dans localStorage
    */
-  const user = ref(localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null)
+  const user = ref(null)
 
   /**
    * ================================
    * GETTERS
    * ================================
-   * 👉 Vérifie si l'utilisateur est connecté
    */
   const isAuthenticated = computed(() => !!user.value)
 
@@ -34,77 +31,51 @@ export const useAuthStore = defineStore('auth', () => {
    * ================================
    */
 
-  /**
-   * Connexion utilisateur (Laravel Sanctum)
-   *
-   * Étapes :
-   * 1️⃣ Récupérer le cookie CSRF
-   * 2️⃣ Envoyer les identifiants à l'API
-   * 3️⃣ Stocker l'utilisateur connecté
-   */
+  // Connexion utilisateur
   const login = async (credentials) => {
-    // 1️⃣ Récupération du cookie CSRF
-    // OBLIGATOIRE pour Sanctum (auth par session)
-    await sanctumClient.get('/sanctum/csrf-cookie')
-
-    // 2️⃣ Appel API de connexion
     const response = await api.login(credentials)
 
-    // 3️⃣ Sauvegarde de l'utilisateur
+    // Sauvegarde du token dans localStorage
+    localStorage.setItem('auth_token', response.data.token)
+
+    // user retourné par l'API
     user.value = response.data.user
   }
 
-  /**
-   * Déconnexion utilisateur
-   *
-   * 👉 Supprime la session côté backend
-   * 👉 Nettoie l'état local
-   */
+  // Déconnexion utilisateur
   const logout = async () => {
     try {
       await api.logout()
     } catch {
-      // On ignore l'erreur si la session est déjà expirée
-      console.warn('Erreur logout ignorée')
+      console.warn('Token déjà invalide ou expiré')
     }
 
+    // Nettoyage local
+    localStorage.removeItem('auth_token')
     user.value = null
-    localStorage.removeItem('user')
   }
 
-  /**
-   * Récupération du profil utilisateur connecté
-   *
-   * 👉 Utilisé après refresh ou rechargement de page
-   * 👉 Permet de vérifier si la session est encore valide
-   */
+  // Récupération de l'utilisateur connecté
   const fetchUser = async () => {
     try {
       const response = await api.getUser()
-
       user.value = response.data
-      localStorage.setItem('user', JSON.stringify(user.value))
     } catch {
-      // Si la session est invalide → déconnexion
-      logout()
+      localStorage.removeItem('auth_token')
+      user.value = null
     }
   }
 
-  /**
-   * Initialisation de l'authentification
-   *
-   * 👉 Appelée au démarrage de l'application
-   * 👉 Vérifie l'état de la session serveur
-   */
+  // Initialisation de l'auth
   const initialize = async () => {
+    const token = localStorage.getItem('auth_token')
+    if (!token) {
+      user.value = null
+      return
+    }
     await fetchUser()
   }
 
-  /**
-   * ================================
-   * EXPORT DU STORE
-   * ================================
-   */
   return {
     user,
     isAuthenticated,
@@ -112,5 +83,13 @@ export const useAuthStore = defineStore('auth', () => {
     logout,
     fetchUser,
     initialize,
+  }
+},
+{
+  // Persist user in localStorage
+  persist: {
+    key: 'auth',        // clé dans le localStorage
+    storage: localStorage,
+    paths: ['user']     // seuls les champs à persister
   }
 })

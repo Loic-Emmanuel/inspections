@@ -356,7 +356,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
-import MainLayout from '../components/MainLayout.vue'
+import MainLayout from '@/components/MainLayout.vue'
 
 const router = useRouter()
 
