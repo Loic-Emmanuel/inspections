@@ -10,7 +10,7 @@
         </div>
 
         <!-- Statistiques -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
           <!-- Total Inspections -->
           <div class="bg-white rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 border border-gray-200">
             <div class="flex items-center justify-between">
@@ -26,7 +26,7 @@
               </div>
             </div>
             <div class="mt-3 sm:mt-4 flex items-center text-xs sm:text-sm">
-              <span class="text-green-600 font-medium">+12%</span>
+              <span :class="stats.moisPrec >= 0 ? 'text-green-600' : 'text-red-600' + ' font-medium'">{{ stats.moisPrec }}</span>
               <span class="text-gray-600 ml-2">ce mois-ci</span>
             </div>
           </div>
@@ -46,7 +46,7 @@
               </div>
             </div>
             <div class="mt-3 sm:mt-4 flex items-center text-xs sm:text-sm">
-              <span class="text-green-600 font-medium">+8%</span>
+              <span :class="stats.pourcentVsMoisPrec >= 0 ? 'text-green-600' : 'text-red-600' + ' font-medium'">{{ stats.pourcentVsMoisPrec }}%</span>
               <span class="text-gray-600 ml-2">vs mois dernier</span>
             </div>
           </div>
@@ -67,12 +67,12 @@
               </div>
             </div>
             <div class="mt-3 sm:mt-4 flex items-center text-xs sm:text-sm">
-              <span class="text-gray-600">Total uploadées</span>
+              <span class="text-gray-600">Total téléversées</span>
             </div>
           </div>
 
           <!-- Rapports générés -->
-          <div class="bg-white rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 border border-gray-200">
+          <!-- <div class="bg-white rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 border border-gray-200">
             <div class="flex items-center justify-between">
               <div class="flex-1 min-w-0">
                 <p class="text-xs sm:text-sm text-gray-600 font-medium truncate">Rapports</p>
@@ -89,7 +89,7 @@
             <div class="mt-3 sm:mt-4 flex items-center text-xs sm:text-sm">
               <span class="text-gray-600">PDFs générés</span>
             </div>
-          </div>
+          </div> -->
         </div>
 
         <!-- Actions rapides -->
@@ -159,13 +159,13 @@
 
           <div v-else class="divide-y divide-gray-200">
             <div v-for="inspection in recentInspections" :key="inspection.id"
-              class="px-4 sm:px-6 py-3 sm:py-4 hover:bg-gray-50 transition cursor-pointer" @click="goToInspection(inspection.id)">
+              class="px-4 sm:px-6 py-3 sm:py-4 hover:bg-gray-50 transition cursor-pointer" @click="goToInspection(inspection.uuid)">
               <div class="flex items-center justify-between gap-3">
                 <div class="flex-1 min-w-0">
                   <div class="flex flex-wrap items-center gap-2 sm:gap-3 mb-1 sm:mb-0">
-                    <h3 class="text-sm sm:text-base font-semibold text-gray-900 truncate">{{ inspection.location }}</h3>
-                    <span class="px-2 py-0.5 sm:py-1 text-xs font-medium rounded-full flex-shrink-0" :class="getStatusClass(inspection.status)">
-                      {{ inspection.status }}
+                    <h3 class="text-sm sm:text-base font-semibold text-gray-900 truncate">{{ inspection.lieu }}</h3>
+                    <span class="px-2 py-0.5 sm:py-1 text-xs font-medium rounded-full flex-shrink-0" :class="getStatusClass(inspection.statut)">
+                      {{ inspection.statut.charAt(0).toUpperCase() + inspection.statut.slice(1).split('_').join(' ') }}
                     </span>
                   </div>
                   <div class="mt-1 sm:mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm text-gray-600">
@@ -175,7 +175,7 @@
                           d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
                         </path>
                       </svg>
-                      <span class="truncate">{{ formatDate(inspection.date) }}</span>
+                      <span class="truncate">{{ formatDate(inspection.date_inspection) }}</span>
                     </span>
                     <span class="flex items-center">
                       <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -183,7 +183,7 @@
                           d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
                         </path>
                       </svg>
-                      {{ inspection.images_count }} images
+                      {{ inspection.nbreImge }} image{{ inspection.nbreImge > 1 ? 's' : '' }}
                     </span>
                   </div>
                 </div>
@@ -205,6 +205,7 @@ import { useRouter } from 'vue-router'
 import api from '@/services/api'
 import MainLayout from '@/components/MainLayout.vue'
 
+
 const router = useRouter()
 
 const loading = ref(true)
@@ -214,6 +215,8 @@ const stats = ref({
   thisMonth: 0,
   images: 0,
   reports: 0,
+  moisPrec: 0.0,
+  pourcentVsMoisPrec: 0.0
 })
 
 const recentInspections = ref([])
@@ -222,17 +225,23 @@ const fetchDashboardData = async () => {
   loading.value = true
 
   try {
-    const { data } = await api.getDashboard()
-    console.log(data)
+    const response = await api.getDashboard()
+    const data = response.data
 
-    stats.value = data.stats ?? stats.value
-    recentInspections.value = data.recent_inspections ?? []
+    stats.value.total = data.total_inspections ?? stats.value.total
+    stats.value.thisMonth = data.inspectMois ?? stats.value.thisMonth
+    stats.value.images = data.inspection_images ?? stats.value.images
+    stats.value.moisPrec = data.augmentNbre ?? stats.value.moisPrec
+    stats.value.pourcentVsMoisPrec = data.pourcentVsMoisPrec ?? stats.value.pourcentVsMoisPrec
+
+    recentInspections.value = data.cinqDerniers ?? []
   } catch (error) {
     console.error('Erreur chargement dashboard:', error)
   } finally {
     loading.value = false
   }
 }
+
 
 const formatDate = (date) =>
   new Date(date).toLocaleDateString('fr-FR', {
@@ -241,17 +250,17 @@ const formatDate = (date) =>
     year: 'numeric',
   })
 
-const getStatusClass = (status) => {
+const getStatusClass = (statut) => {
   const map = {
-    Complétée: 'bg-green-100 text-green-800',
-    'En cours': 'bg-yellow-100 text-yellow-800',
-    Brouillon: 'bg-gray-100 text-gray-800',
+    conforme: 'bg-green-100 text-green-800',
+    partiellement_conforme: 'bg-yellow-100 text-yellow-800',
+    non_conforme: 'bg-red-100 text-red-800',
   }
-  return map[status] || 'bg-gray-100 text-gray-800'
+  return map[statut] || 'bg-gray-100 text-gray-800'
 }
 
-const goToInspection = (id) => {
-  router.push({ name: 'InspectionDetail', params: { id } })
+const goToInspection = (uuid) => {
+  router.push({ name: 'InspectionDetail', params: { id: uuid } })
 }
 
 onMounted(fetchDashboardData)

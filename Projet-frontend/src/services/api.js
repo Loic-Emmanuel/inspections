@@ -2,41 +2,51 @@ import axios from 'axios'
 
 /**
  * ================================
- * CLIENT API (routes /api/*)
+ * CLIENT API (Sanctum TOKEN)
  * ================================
- * 👉 Utilisé pour TOUTES les routes Laravel API protégées par Sanctum
- * 👉 Exemple : /api/login, /api/user, /api/inspections
+ * Utilisé pour TOUTES les routes Laravel API protégées par Sanctum token
+ * Auth via Authorization: Bearer TOKEN
  */
 const apiClient = axios.create({
-  // Backend API
-  // baseURL: import.meta.env.VITE_API_URL_DEV || 'http://localhost:8000/api/v1',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1',
 
-  // Headers standards pour Laravel
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',
     'X-Requested-With': 'XMLHttpRequest',
   },
-
-  // OBLIGATOIRE pour Sanctum (cookies de session)
-  withCredentials: true,
-  withXSRFToken: true,
 })
 
 /**
  * ================================
- * INTERCEPTEUR GLOBAL
+ * INTERCEPTEUR REQUEST
  * ================================
- * 👉 Gestion centralisée des erreurs
- * 👉 En cas de 401, redirection vers login
+ * Injection automatique du token
+ */
+apiClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem('auth_token')
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+
+  return config
+})
+
+/**
+ * ================================
+ * INTERCEPTEUR RESPONSE
+ * ================================
+ * Gestion des erreurs globales
  */
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Évite une boucle infinie si déjà sur /login
+      localStorage.removeItem('auth_token')
+
       if (!window.location.pathname.includes('/login')) {
-        window.location.href = '/auth/login'
+        window.location.href = '/login'
       }
     }
     return Promise.reject(error)
@@ -47,24 +57,28 @@ apiClient.interceptors.response.use(
  * ================================
  * SERVICES API
  * ================================
- * 👉 Un seul point d’entrée pour les appels backend
  */
 const api = {
   // ================================
   // AUTHENTIFICATION
   // ================================
-  login(credentials) {
-    // POST /api/login
-    return apiClient.post('auth/login', credentials)
+  async login(credentials) {
+    const response = await apiClient.post('/login', credentials)
+
+    // 🔐 Sauvegarde du token
+    if (response.data?.token) {
+      localStorage.setItem('auth_token', response.data.token)
+    }
+
+    return response
   },
 
   logout() {
-    // POST /api/logout
+    localStorage.removeItem('auth_token')
     return apiClient.post('/logout')
   },
 
   getUser() {
-    // GET /api/user
     return apiClient.get('/user')
   },
 
@@ -72,7 +86,7 @@ const api = {
   // DASHBOARD
   // ================================
   getDashboard() {
-    return apiClient.get('/dashboard')
+    return apiClient.get('/stat/month')
   },
 
   // ================================
@@ -129,27 +143,17 @@ const api = {
   // RAPPORTS
   // ================================
   generateReport(inspectionId) {
-    return apiClient.get(`/inspections/${inspectionId}/report`, { responseType: 'blob' })
+    return apiClient.get(`/inspections/${inspectionId}/report`, {
+      responseType: 'blob',
+    })
   },
 
   downloadReport(inspectionId) {
-    return apiClient.get(`/inspections/${inspectionId}/report/download`, { responseType: 'blob' })
+    return apiClient.get(`/inspections/${inspectionId}/report/download`, {
+      responseType: 'blob',
+    })
   },
 }
-
-/**
- * ================================
- * CLIENT SANCTUM (sans /api)
- * ================================
- * 👉 UTILISÉ UNIQUEMENT pour :
- *    /sanctum/csrf-cookie
- * 👉 IMPORTANT : pas de /api ici
- */
-export const sanctumClient = axios.create({
-  baseURL: 'http://192.168.1.101:8092',
-  withCredentials: true,
-  withXSRFToken: true,
-})
 
 /**
  * ================================

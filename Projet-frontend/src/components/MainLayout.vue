@@ -13,7 +13,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg> -->
-              <img src="/logo.png" alt="Logo du logiciel">
+                <img src="/logo.png" alt="Logo du logiciel">
               </div>
               <span class="ml-3 text-xl font-bold text-gray-900">Inspections</span>
             </div>
@@ -115,7 +115,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg> -->
-          <img src="/logo.png" alt="Logo du logiciel">
+            <img src="/logo.png" alt="Logo du logiciel">
           </div>
           <span class="ml-2 text-lg font-bold text-gray-900">Inspections</span>
         </div>
@@ -132,7 +132,7 @@
     <div v-if="isMobileUserMenuOpen" @click="toggleMobileUserMenu"
       class="sm:hidden fixed inset-0 bg-black bg-opacity-50 z-40">
       <div @click.stop class="absolute top-14 right-0 left-0 bg-white shadow-lg py-2 mx-4 mt-2 rounded-lg">
-        <div class="px-4 py-3 border-b border-gray-200">
+        <div v-if="userName" class="px-4 py-3 border-b border-gray-200">
           <p class="text-sm font-medium text-gray-900">{{ userName }}</p>
         </div>
         <a href="#" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50">
@@ -235,16 +235,23 @@ const isMobileUserMenuOpen = ref(false)
 /**
  * Données utilisateur depuis Pinia
  */
-const userName = computed(() => authStore.user?.nom + ' ' + authStore.user?.prenom || 'Utilisateur')
+ const userName = computed(() => {
+  if (!authStore.user) return 'Utilisateur'
+  return `${authStore.user.name} ${authStore.user.firstname}`
+})
 
 const userInitials = computed(() => {
-  return userName.value
+  if (!authStore.user?.name) return 'U'
+
+  return authStore.user.name
     .split(' ')
-    .map((n) => n[0])
+    .filter(Boolean)
+    .map(n => n[0])
     .join('')
     .toUpperCase()
     .slice(0, 2)
 })
+
 
 /**
  * Vérifie si une route est active
