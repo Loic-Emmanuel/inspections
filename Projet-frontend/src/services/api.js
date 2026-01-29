@@ -96,20 +96,24 @@ const api = {
     return apiClient.get('/inspections', { params })
   },
 
-  getInspection(id) {
-    return apiClient.get(`/inspections/${id}`)
+  getInspection(uuid) {
+    return apiClient.get(`/inspections/${uuid}`)
   },
 
   createInspection(data) {
-    return apiClient.post('/inspections', data)
+    return apiClient.post('/store/inspections', data, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+  },
+  
+  updateInspection(uuid, data) {
+    return apiClient.put(`/inspections/${uuid}`, data)
   },
 
-  updateInspection(id, data) {
-    return apiClient.put(`/inspections/${id}`, data)
-  },
-
-  deleteInspection(id) {
-    return apiClient.delete(`/inspections/${id}`)
+  deleteInspection(uuid) {
+    return apiClient.delete(`/inspections/${uuid}`)
   },
 
   // ================================

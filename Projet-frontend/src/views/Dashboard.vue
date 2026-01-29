@@ -163,7 +163,7 @@
               <div class="flex items-center justify-between gap-3">
                 <div class="flex-1 min-w-0">
                   <div class="flex flex-wrap items-center gap-2 sm:gap-3 mb-1 sm:mb-0">
-                    <h3 class="text-sm sm:text-base font-semibold text-gray-900 truncate">{{ inspection.lieu }}</h3>
+                    <h3 class="text-sm sm:text-base font-semibold text-gray-900 truncate">{{ inspection.client }}</h3>
                     <span class="px-2 py-0.5 sm:py-1 text-xs font-medium rounded-full flex-shrink-0" :class="getStatusClass(inspection.statut)">
                       {{ inspection.statut.charAt(0).toUpperCase() + inspection.statut.slice(1).split('_').join(' ') }}
                     </span>

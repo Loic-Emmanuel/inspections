@@ -4,10 +4,7 @@
       <!-- Logo/Header -->
       <div class="text-center mb-8">
         <div class="inline-flex items-center justify-center w-16 h-16 bg-indigo-600 rounded-full mb-4">
-          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
+          <img src="/logo.png" alt="">
         </div>
         <h1 class="text-3xl font-bold text-gray-900">Gestion d'Inspections</h1>
         <p class="text-gray-600 mt-2">Connectez-vous à votre compte</p>
@@ -84,6 +81,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
+
 const router = useRouter()
 const authStore = useAuthStore()
 
@@ -111,9 +109,52 @@ const handleLogin = async () => {
     // Redirection après succès
     router.push({ name: 'Dashboard' })
   } catch (err) {
-    error.value = err.response?.data?.message || 'Identifiants incorrects. Veuillez réessayer.'
+    // Reset message
+    error.value = 'Une erreur est survenue'
+
+    // Erreur Axios avec réponse serveur
+    if (err.response) {
+      const status = err.response.status
+      const data = err.response.data
+
+      switch (status) {
+        case 401:
+          error.value = 'Email ou mot de passe incorrect'
+          break
+
+        case 422:
+          // Si l’API renvoie des erreurs de validation
+          if (data?.errors) {
+            error.value = Object.values(data.errors)
+              .flat()
+              .join(', ')
+          } else {
+            error.value = data?.message || 'Données invalides'
+          }
+          break
+
+        case 403:
+          error.value = 'Accès refusé'
+          break
+
+        case 500:
+          error.value = 'Erreur serveur. Réessaie plus tard.'
+          break
+
+        default:
+          error.value = data?.message || 'Erreur inconnue'
+      }
+
+      // Pas de réponse → problème réseau
+    } else if (err.request) {
+      error.value = 'Impossible de joindre le serveur. Vérifiez votre connexion.'
+
+      // Autre erreur JS
+    } else {
+      error.value = err.message || 'Erreur inattendue'
+    }
   } finally {
-    loading.value = false
-  }
+  loading.value = false
+}
 }
 </script>

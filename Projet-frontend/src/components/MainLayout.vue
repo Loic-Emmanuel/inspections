@@ -236,9 +236,15 @@ const isMobileUserMenuOpen = ref(false)
  * Données utilisateur depuis Pinia
  */
  const userName = computed(() => {
-  if (!authStore.user) return 'Utilisateur'
-  return `${authStore.user.name} ${authStore.user.firstname}`
+  const user = authStore.user
+
+  if (!user || !user.name || !user.firstname) {
+    return 'Utilisateur'
+  }
+
+  return `${user.name} ${user.firstname}`
 })
+
 
 const userInitials = computed(() => {
   if (!authStore.user?.name) return 'U'
