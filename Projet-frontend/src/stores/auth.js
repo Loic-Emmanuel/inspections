@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import api from '@/services/api'
-
 /**
  * =====================================
  * STORE AUTHENTIFICATION (Pinia)
@@ -39,7 +38,11 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.setItem('auth_token', response.data.token)
 
     // user retourné par l'API
-    user.value = response.data.user
+    user.value = {
+      ...response.data.user,
+      name: response.data.user.name || '',
+      firstname: response.data.user.firstname || ''
+    }
   }
 
   // Déconnexion utilisateur
@@ -69,11 +72,21 @@ export const useAuthStore = defineStore('auth', () => {
   // Initialisation de l'auth
   const initialize = async () => {
     const token = localStorage.getItem('auth_token')
+    
     if (!token) {
       user.value = null
       return
     }
-    await fetchUser()
+  
+    // Si user est déjà en mémoire (grâce à persist), on vérifie sa validité
+    if (user.value) {
+      // Optionnel : vérifier que les données sont complètes
+      if (!user.value.name || !user.value.firstname) {
+        await fetchUser()
+      }
+    } else {
+      await fetchUser()
+    }
   }
 
   return {
@@ -88,8 +101,8 @@ export const useAuthStore = defineStore('auth', () => {
 {
   // Persist user in localStorage
   persist: {
-    key: 'auth',        // clé dans le localStorage
+    key: 'auth',
     storage: localStorage,
-    paths: ['user']     // seuls les champs à persister
+    paths: ['user']
   }
 })
