@@ -104,7 +104,7 @@
           <div v-if="inspection.recommandations" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h2 class="text-xl font-bold text-gray-900 mb-4">Recommandations</h2>
             <p class="text-gray-700 leading-relaxed whitespace-pre-line">
-              {{ inspection.recommendations }}
+              {{ inspection.recommandations }}
             </p>
           </div>
         </div>
@@ -151,7 +151,7 @@
               </div>
               <div class="flex items-center justify-between">
                 <span class="text-sm text-gray-600">Inspecteur</span>
-                <span class="text-sm font-semibold text-gray-900">{{ inspection.inspector_name || 'N/A' }}</span>
+                <span class="text-sm font-semibold text-gray-900">{{ userName || 'N/A' }}</span>
               </div>
             </div>
           </div>
@@ -264,6 +264,7 @@ const route = useRoute()
 
 const inspection = ref(null)
 const loading = ref(true)
+const userName = ref('')
 const nombre_categories = ref(0)
 const API_BASE_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
@@ -277,6 +278,7 @@ const fetchInspection = async () => {
     const response = await api.showInspection(route.params.id)
     inspection.value = response.data.inspection
     nombre_categories.value = response.data.nbreCategories
+    userName.value = response.data.userName
   } catch (error) {
     console.error("Erreur lors du chargement de l'inspection:", error)
   } finally {
