@@ -168,6 +168,8 @@
                       v-model="passwordForm.currentPassword" 
                       :type="showCurrentPassword ? 'text' : 'password'" 
                       required
+                      name="currentPassword"
+                      autocomplete="current-password"
                       class="w-full px-3 py-2 sm:px-4 sm:py-2.5 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent pr-10 transition"
                       placeholder="Mot de passe actuel" 
                     />
@@ -198,6 +200,8 @@
                       :type="showNewPassword ? 'text' : 'password'" 
                       required
                       minlength="6"
+                      name="newPassword"
+                      autocomplete="new-password"
                       class="w-full px-3 py-2 sm:px-4 sm:py-2.5 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent pr-10 transition"
                       placeholder="Nouveau mot de passe (min. 6 caractères)" 
                     />
@@ -228,6 +232,8 @@
                       :type="showConfirmPassword ? 'text' : 'password'" 
                       required
                       minlength="6"
+                      name="confirmPassword"
+                      autocomplete="new-password"
                       class="w-full px-3 py-2 sm:px-4 sm:py-2.5 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent pr-10 transition"
                       :class="{ 'border-red-500 focus:ring-red-500': passwordForm.confirmPassword && passwordForm.newPassword !== passwordForm.confirmPassword }"
                       placeholder="Confirmez le mot de passe" 
@@ -282,6 +288,11 @@
 import { ref, onMounted } from 'vue'
 import api from '@/services/api'
 import MainLayout from '@/components/MainLayout.vue'
+import { useNotifications } from '@/services/useNotifications';
+import { useAuthStore } from '@/stores/auth';
+
+const { notify } = useNotifications();
+const authStore = useAuthStore();
 
 // Onglet actif
 const activeTab = ref('profile')
@@ -291,13 +302,14 @@ const profileForm = ref({
   name: '',
   firstname: '',
   email: '',
-  contact: ''
+  contact: '',
+  form: 1
 })
 
 const passwordForm = ref({
   currentPassword: '',
   newPassword: '',
-  confirmPassword: ''
+  confirmPassword: '',
 })
 
 // États pour l'affichage des mots de passe
@@ -316,32 +328,42 @@ const errorMessage = ref('')
 // Charger les données du profil
 const loadProfile = async () => {
   try {
-    const response = await api.getProfile() // À adapter selon votre API
-    const data = response.data
+    const response = await api.getUser()
+    const data = response.data.user
     
     profileForm.value = {
       name: data.name || '',
       firstname: data.firstname || '',
       email: data.email || '',
-      contact: data.contact || ''
+      contact: data.contact || '',
+      form: 1
     }
   } catch (error) {
     console.error('Erreur chargement profil:', error)
-    showError('Impossible de charger les informations du profil')
+    notify.error('Impossible de charger les informations du profil')
   }
 }
 
 // Mettre à jour le profil
 const updateProfile = async () => {
   loadingProfile.value = true
-  clearMessages()
   
   try {
-    await api.updateProfile(profileForm.value) // À adapter selon votre API
-    showSuccess('Profil mis à jour avec succès')
+    const response = await api.updateProfileOrPassword(profileForm.value)
+    console.log('modification profil:', response.data)
+
+    authStore.user = {
+      ...response.data.user,
+      name: response.data.user.name || '',
+      firstname: response.data.user.firstname || ''
+    }
+
+    notify.success(response.data.message)
   } catch (error) {
+    if (error.status === 422) {
+      showValidationErrors(error.response.data.errors)
+    }
     console.error('Erreur mise à jour profil:', error)
-    showError('Erreur lors de la mise à jour du profil')
   } finally {
     loadingProfile.value = false
   }
@@ -350,20 +372,21 @@ const updateProfile = async () => {
 // Mettre à jour le mot de passe
 const updatePassword = async () => {
   if (passwordForm.value.newPassword !== passwordForm.value.confirmPassword) {
-    showError('Les mots de passe ne correspondent pas')
+    notify.error('Les deux mots de passe ne correspondent pas')
     return
   }
 
   loadingPassword.value = true
-  clearMessages()
   
   try {
-    await api.updatePassword({
+    const response = await api.updateProfileOrPassword({
       currentPassword: passwordForm.value.currentPassword,
-      newPassword: passwordForm.value.newPassword
-    }) // À adapter selon votre API
-    
-    showSuccess('Mot de passe modifié avec succès')
+      newPassword: passwordForm.value.newPassword,
+      confirmPassword: passwordForm.value.confirmPassword,
+      form: 2
+    }) 
+    console.log('modification mot de passe:', response.data)
+    notify.success(response.data.message || 'Mot de passe modifié avec succès')
     
     // Réinitialiser le formulaire
     passwordForm.value = {
@@ -372,31 +395,27 @@ const updatePassword = async () => {
       confirmPassword: ''
     }
   } catch (error) {
+    if (error.status === 422) {
+      showValidationErrors(error.response.data.errors)
+    }
+    notify.error(error.response.data.message)
     console.error('Erreur modification mot de passe:', error)
-    showError(error.response?.data?.message || 'Erreur lors de la modification du mot de passe')
   } finally {
     loadingPassword.value = false
   }
 }
 
-// Gestion des messages
-const showSuccess = (message) => {
-  successMessage.value = message
-  setTimeout(() => {
-    successMessage.value = ''
-  }, 5000)
-}
 
-const showError = (message) => {
-  errorMessage.value = message
-  setTimeout(() => {
-    errorMessage.value = ''
-  }, 5000)
-}
+const showValidationErrors = (errors) => {
+  let delay = 0
 
-const clearMessages = () => {
-  successMessage.value = ''
-  errorMessage.value = ''
+  Object.values(errors).flat().forEach((message) => {
+    setTimeout(() => {
+      notify.error(message)
+    }, delay)
+
+    delay += 500
+  })
 }
 
 onMounted(() => {
