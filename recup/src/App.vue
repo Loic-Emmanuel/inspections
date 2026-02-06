@@ -20,3 +20,27 @@ useInactivityLogout()
   <NotificationSystem ref="notificationSystem" />
   <RouterView />
 </template>
+
+<style>
+/* Correction du zoom sur iPhone */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="password"],
+select,
+textarea {
+    font-size: 16px !important; /* Minimum 16px pour éviter le zoom automatique sur iOS */
+}
+
+/* Sur desktop, garder la taille responsive */
+@media (min-width: 640px) {
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="password"],
+    select,
+    textarea {
+        font-size: 1rem !important;
+    }
+}
+</style>

@@ -73,6 +73,11 @@ const api = {
     return response
   },
 
+  async registerUser(credentials) {
+    const response = await apiClient.post('/register', credentials)
+    return response
+  },
+
   logout() {
     localStorage.removeItem('auth_token')
     return apiClient.post('/logout')
@@ -82,6 +87,21 @@ const api = {
     return apiClient.get('/user')
   },
 
+  // ================================
+  // UTILISATEURS
+  // ================================
+  getUserList(params = {}) {
+    return apiClient.get('/list/users', { params })
+  },
+
+  updateUser(id, data) {
+    return apiClient.post(`/update/${id}`, data)
+  },
+
+  deleteUser(id) {
+    return apiClient.delete(`/delete/${id}`)
+  },
+  
   // ================================
   // DASHBOARD
   // ================================

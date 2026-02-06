@@ -72,6 +72,15 @@ const routes = [
       title: 'Liste des Utilisateurs - Inspections'
     },
   },
+  {
+    path: '/profil',
+    name: 'Profil',
+    component: () => import('@/views/Profil.vue'),
+    meta: { 
+      requiresAuth: true,
+      title: 'Profil - Inspections'
+    },
+  },
 
   /**
    * 404
