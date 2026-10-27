@@ -73,6 +73,11 @@ const api = {
     return response
   },
 
+  async registerUser(credentials) {
+    const response = await apiClient.post('/register', credentials)
+    return response
+  },
+
   logout() {
     localStorage.removeItem('auth_token')
     return apiClient.post('/logout')
@@ -80,6 +85,32 @@ const api = {
 
   getUser() {
     return apiClient.get('/user')
+  },
+
+  // ================================
+  // UTILISATEURS
+  // ================================
+  getUserList(params = {}) {
+    return apiClient.get('/list/users', { params })
+  },
+
+  updateUser(id, data) {
+    return apiClient.post(`/update/${id}`, data)
+  },
+
+  deleteUser(id) {
+    return apiClient.delete(`/delete/${id}`)
+  },
+
+  // ================================
+  // CLIENTS
+  // ================================
+  getClients() {
+    return apiClient.get('/clients')
+  },
+
+  createClient(data) {
+    return apiClient.post('/clients', data)
   },
 
   // ================================
@@ -93,54 +124,27 @@ const api = {
   // INSPECTIONS
   // ================================
   getInspections(params = {}) {
-    return apiClient.get('/inspections', { params })
+    return apiClient.get('/list/inspections', { params })
   },
 
-  getInspection(uuid) {
-    return apiClient.get(`/inspections/${uuid}`)
+  showInspection(uuid) {
+    return apiClient.get(`/show/inspection/${uuid}`)
   },
 
   createInspection(data) {
     return apiClient.post('/store/inspections', data, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    })
-  },
-  
-  updateInspection(uuid, data) {
-    return apiClient.put(`/inspections/${uuid}`, data)
-  },
-
-  deleteInspection(uuid) {
-    return apiClient.delete(`/inspections/${uuid}`)
-  },
-
-  // ================================
-  // IMAGES
-  // ================================
-  uploadInspectionImages(inspectionId, images, category) {
-    const formData = new FormData()
-
-    images.forEach((image, index) => {
-      formData.append(`images[${index}]`, image)
-    })
-
-    formData.append('category', category)
-
-    return apiClient.post(`/inspections/${inspectionId}/images`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
     })
   },
 
-  getInspectionImages(inspectionId) {
-    return apiClient.get(`/inspections/${inspectionId}/images`)
+  updateInspection(uuid, data) {
+    return apiClient.put(`/inspections/${uuid}`, data)
   },
 
-  deleteImage(imageId) {
-    return apiClient.delete(`/images/${imageId}`)
+  deleteInspection(uuid) {
+    return apiClient.delete(`/inspections/${uuid}`)
   },
 
   // ================================
@@ -156,6 +160,13 @@ const api = {
     return apiClient.get(`/inspections/${inspectionId}/report/download`, {
       responseType: 'blob',
     })
+  },
+
+  // ================================
+  // PROFIL
+  // ================================
+  updateProfileOrPassword(data) {
+    return apiClient.post('/update/profile', data)
   },
 }
 

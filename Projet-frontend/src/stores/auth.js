@@ -9,35 +9,24 @@ import api from '@/services/api'
  * Auth par Bearer Token (localStorage)
  */
 export const useAuthStore = defineStore('auth', () => {
-
-  /**
-   * ================================
-   * STATE
-   * ================================
-   */
+  /** STATE */
   const user = ref(null)
+  const token = ref(null)
 
-  /**
-   * ================================
-   * GETTERS
-   * ================================
-   */
-  const isAuthenticated = computed(() => !!user.value)
+  /** GETTERS */
+  const isAuthenticated = computed(() => !!token.value) // 🔥 Mieux de vérifier le token
 
-  /**
-   * ================================
-   * ACTIONS
-   * ================================
-   */
-
-  // Connexion utilisateur
+  /** ACTIONS */
+  
   const login = async (credentials) => {
     const response = await api.login(credentials)
-
-    // Sauvegarde du token dans localStorage
-    localStorage.setItem('auth_token', response.data.token)
-
-    // user retourné par l'API
+    
+    // Sauvegarder le token
+    const authToken = response.data.token
+    localStorage.setItem('auth_token', authToken)
+    token.value = authToken // 🔥 IMPORTANT : synchroniser avec le state
+    
+    // Sauvegarder l'utilisateur
     user.value = {
       ...response.data.user,
       name: response.data.user.name || '',
@@ -45,20 +34,19 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // Déconnexion utilisateur
   const logout = async () => {
     try {
       await api.logout()
     } catch {
       console.warn('Token déjà invalide ou expiré')
     }
-
-    // Nettoyage local
+    
+    // Nettoyage complet
     localStorage.removeItem('auth_token')
     user.value = null
+    token.value = null
   }
 
-  // Récupération de l'utilisateur connecté
   const fetchUser = async () => {
     try {
       const response = await api.getUser()
@@ -66,18 +54,23 @@ export const useAuthStore = defineStore('auth', () => {
     } catch {
       localStorage.removeItem('auth_token')
       user.value = null
+      token.value = null
     }
   }
 
-  // Initialisation de l'auth
+  // 🔥 CORRECTION PRINCIPALE ICI
   const initialize = async () => {
-    const token = localStorage.getItem('auth_token')
+    const storedToken = localStorage.getItem('auth_token')
     
-    if (!token) {
+    if (!storedToken) {
       user.value = null
+      token.value = null
       return
     }
-  
+
+    // 🔥 CRUCIAL : Restaurer le token dans le state
+    token.value = storedToken
+
     // Si user est déjà en mémoire (grâce à persist), on vérifie sa validité
     if (user.value) {
       // Optionnel : vérifier que les données sont complètes
@@ -85,24 +78,24 @@ export const useAuthStore = defineStore('auth', () => {
         await fetchUser()
       }
     } else {
+      // Sinon, récupérer l'utilisateur
       await fetchUser()
     }
   }
 
   return {
     user,
+    token,
     isAuthenticated,
     login,
     logout,
     fetchUser,
     initialize,
   }
-},
-{
-  // Persist user in localStorage
+}, {
   persist: {
     key: 'auth',
     storage: localStorage,
-    paths: ['user']
+    paths: ['user', 'token'] // 🔥 Optionnel : persister aussi le token
   }
 })

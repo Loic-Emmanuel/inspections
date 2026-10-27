@@ -252,9 +252,9 @@ const formatDate = (date) =>
 
 const getStatusClass = (statut) => {
   const map = {
-    conforme: 'bg-green-100 text-green-800',
-    partiellement_conforme: 'bg-yellow-100 text-yellow-800',
-    non_conforme: 'bg-red-100 text-red-800',
+    Conforme: 'bg-green-100 text-green-800',
+    'Partiellement conforme': 'bg-yellow-100 text-yellow-800',
+    'Non conforme': 'bg-red-100 text-red-800',
   }
   return map[statut] || 'bg-gray-100 text-gray-800'
 }

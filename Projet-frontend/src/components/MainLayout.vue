@@ -56,7 +56,7 @@
                 Historique
               </router-link>
 
-              <router-link :to="{ name: 'UserList' }"
+              <router-link :to="{ name: 'UserList' }" v-if="showUserMenu"
                 class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-md transition" :class="isActive('/users')
                   ? 'text-indigo-600 bg-indigo-50'
                   : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50'
@@ -87,12 +87,9 @@
               <!-- Dropdown menu -->
               <div v-if="isDropdownOpen"
                 class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-10 border border-gray-200">
-                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                <router-link :to="{ name: 'Profil' }" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                   Mon profil
-                </a>
-                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                  Paramètres
-                </a>
+                </router-link>
                 <hr class="my-1" />
                 <button @click="handleLogout"
                   class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
@@ -135,12 +132,9 @@
         <div v-if="userName" class="px-4 py-3 border-b border-gray-200">
           <p class="text-sm font-medium text-gray-900">{{ userName }}</p>
         </div>
-        <a href="#" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50">
+        <router-link :to="{ name: 'Profil' }" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50">
           Mon profil
-        </a>
-        <a href="#" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50">
-          Paramètres
-        </a>
+        </router-link>
         <button @click="handleLogout"
           class="block w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 border-t border-gray-200">
           Déconnexion
@@ -200,7 +194,8 @@
         </router-link>
 
         <!-- Utilisateurs -->
-        <router-link :to="{ name: 'UserList' }"
+
+        <router-link :to="{ name: 'UserList' }" v-if="showUserMenu"
           class="flex flex-col items-center justify-center space-y-1 transition-colors" :class="isActive('/users')
             ? 'text-indigo-600'
             : 'text-gray-600 hover:text-indigo-600'
@@ -228,6 +223,7 @@ const authStore = useAuthStore()
 // Dropdown utilisateur Desktop
 const isDropdownOpen = ref(false)
 const dropdownRef = ref(null)
+
 
 // Menu utilisateur Mobile
 const isMobileUserMenuOpen = ref(false)
@@ -258,6 +254,12 @@ const userInitials = computed(() => {
     .slice(0, 2)
 })
 
+/**
+ * Affichage le menu par role
+ */
+const showUserMenu = computed(() => {
+  return authStore.user && authStore.user.role === 'admin'
+})
 
 /**
  * Vérifie si une route est active

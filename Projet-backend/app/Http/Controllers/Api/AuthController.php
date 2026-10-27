@@ -21,19 +21,22 @@ class AuthController extends Controller
             return response()->json(['message' => 'Identifiants incorrects'], 401);
         }
 
-        $request->session()->regenerate();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'user' => Auth::user(),
+            'token' => $token,
+            'user' => $user,
             'message' => 'Connecté avec succès'
         ]);
     }
 
     public function logout(Request $request)
     {
-        Auth::guard('web')->logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        if ($request->user()) {
+            $request->user()->currentAccessToken()?->delete();
+        }
 
         return response()->json([
             'success' => true,

@@ -76,10 +76,33 @@
 
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">
-                  Nom du responsable <span class="text-red-500">*</span>
+                  Client / Exploitant <span class="text-red-500">*</span>
                 </label>
-                <input v-model="form.responsible_name" type="text" required placeholder="Nom complet du responsable"
-                  class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" />
+                <div class="space-y-3">
+                  <select 
+                    v-model="selectedClientId" 
+                    @change="onClientSelect"
+                    class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
+                  >
+                    <option value="">+ Nouveau client (saisir manuellement ci-dessous)</option>
+                    <option v-for="client in clientsList" :key="client.id" :value="client.id">
+                      {{ client.nom }} {{ client.telephone ? '(' + client.telephone + ')' : '' }}
+                    </option>
+                  </select>
+
+                  <input 
+                    v-model="form.responsible_name" 
+                    type="text" 
+                    required 
+                    :placeholder="selectedClientId ? 'Nom du client sélectionné' : 'Entrez le nom du nouveau client'"
+                    :readonly="!!selectedClientId"
+                    class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" 
+                    :class="{ 'bg-gray-50 text-gray-700': !!selectedClientId }"
+                  />
+                  <p v-if="!selectedClientId" class="text-xs text-indigo-600">
+                    💡 Un nouveau client portant ce nom sera automatiquement créé s'il n'existe pas encore.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -270,7 +293,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/services/api'
 import MainLayout from '@/components/MainLayout.vue'
@@ -284,15 +307,45 @@ const steps = ['Informations générales', "Ajout d'images", 'Observations']
 const currentStep = ref(0)
 const saving = ref(false)
 
+const clientsList = ref([])
+const selectedClientId = ref('')
+
 const form = ref({
   date_inspection: new Date().toISOString().split('T')[0],
   type_inspection: '',
   lieu_inspection: '',
+  client_id: null,
   responsible_name: '',
   categories: [],
   observations: '',
-  statut: '',
+  statut: 'Conforme',
   recommandations: '',
+})
+
+const fetchClients = async () => {
+  try {
+    const response = await api.getClients()
+    clientsList.value = response.data.clients || []
+  } catch (error) {
+    console.error('Erreur chargement clients:', error)
+  }
+}
+
+const onClientSelect = () => {
+  if (selectedClientId.value) {
+    const selected = clientsList.value.find(c => c.id === Number(selectedClientId.value))
+    if (selected) {
+      form.value.client_id = selected.id
+      form.value.responsible_name = selected.nom
+    }
+  } else {
+    form.value.client_id = null
+    form.value.responsible_name = ''
+  }
+}
+
+onMounted(() => {
+  fetchClients()
 })
 
 const showModal = ref(false)
@@ -398,7 +451,14 @@ const submitInspection = async () => {
 
     Object.keys(form.value).forEach((key) => {
       if (key !== 'categories') {
-        formData.append(key, form.value[key])
+        const val = form.value[key]
+        if (key === 'client_id') {
+          if (val !== null && val !== undefined && val !== '' && val !== 'null') {
+            formData.append(key, val)
+          }
+        } else if (val !== null && val !== undefined) {
+          formData.append(key, val)
+        }
       }
     })
 
@@ -413,7 +473,7 @@ const submitInspection = async () => {
     const message = response.data.message
     notify.success(message, { duration: 3000 })
 
-    router.push({ name: 'InspectionDetail', params: { uuid: response.data.uuid } })
+    router.push({ name: 'InspectionDetail', params: { id: response.data.uuid } })
   } catch (error) {
     // Erreur Axios avec réponse du serveur
     if (error.response) {

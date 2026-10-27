@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('inspection_id')->constrained()->onDelete('cascade');
             $table->string('image_path');
+            $table->text('categories')->nullable();
             $table->text('commentaire')->nullable();
             $table->softDeletes();
             $table->timestamps();

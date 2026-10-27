@@ -10,20 +10,26 @@ class Inspection extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'client_id',
-        'user_id',
+        'uuid',
         'reference',
+        'user_id',
+        'client_id',
         'client',
         'date_inspection',
         'lieu',
         'type',
         'description',
+        'recommandations',
         'statut'
     ];
 
-    public function client()
+    protected $casts = [
+        'date_inspection' => 'date',
+    ];
+
+    public function clientEntity()
     {
-        return $this->belongsTo(Client::class);
+        return $this->belongsTo(Client::class, 'client_id');
     }
 
     public function inspecteur()

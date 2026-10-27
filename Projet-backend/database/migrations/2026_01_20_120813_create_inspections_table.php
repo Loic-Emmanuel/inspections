@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('inspections', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('client_id')->constrained()->onDelete('cascade')->nullable();
+            $table->string('uuid', 100)->nullable();
+            $table->foreignId('client_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('reference')->unique();
             $table->string('client');
@@ -21,6 +22,7 @@ return new class extends Migration
             $table->string('lieu')->nullable();
             $table->string('type')->nullable();
             $table->text('description')->nullable();
+            $table->text('recommandations')->nullable();
             $table->string('statut')->default('en_cours');
             $table->softDeletes();
             $table->timestamps();
